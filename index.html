@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Wrapped 💚</title>
+
+  <style>
+    :root{
+      --bg: #0b0b10;
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --bar: rgba(255,255,255,0.18);
+      --barFill: #1ed760; /* spotify-ish green */
+      --radius: 26px;
+      --shadow: 0 24px 70px rgba(0,0,0,0.45);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    /* ✅ CHANGE: allow the page to scroll */
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(900px 700px at 15% 10%, rgba(30,215,96,0.22), transparent 50%),
+                  radial-gradient(900px 700px at 85% 90%, rgba(163,70,255,0.22), transparent 55%),
+                  linear-gradient(180deg, #07070b, var(--bg));
+      color: var(--text);
+      overflow-x: hidden;   /* ✅ only block sideways scroll */
+      overflow-y: auto;     /* ✅ allow vertical scroll */
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding: 18px;
+    }
+
+    .frame{
+      width: min(920px, 96vw);
+      /* ✅ CHANGE: let it grow taller if needed */
+      min-height: min(640px, 86vh);
+      height: auto;
+
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: visible; /* ✅ so content can extend */
+    }
+
+    /* top progress */
+    .top{
+      position: sticky;     /* ✅ stays visible while scrolling */
+      top: 14px;
+      z-index: 20;
+      margin: 14px 18px 0;
+      display:flex;
+      align-items:center;
+      gap: 12px;
+
+      padding-bottom: 10px;
+      backdrop-filter: blur(10px);
+    }
+    .progress{
+      flex: 1;
+      height: 6px;
+      background: var(--bar);
+      border-radius: 999px;
+      overflow:hidden;
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background: var(--barFill);
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+    .meta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size: 12px;
+      color: var(--muted);
+      user-select:none;
+      white-space: nowrap;
+    }
+    .pill{
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(8px);
+    }
+
+    /* stage */
+    .stage{
+      padding: 12px 18px 84px; /* space for bottom buttons */
+    }
+
+    /* ✅ CHANGE: slides are now normal blocks, not absolute layers
+       so the page can scroll naturally */
+    .slide{
+      width: 100%;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      overflow: hidden;
+      margin: 12px 0;
+
+      padding: 18px;
+      display: none; /* only active slide is shown */
+    }
+    .slide.active{
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* image area: BIG + scrollable within page (not constrained) */
+    .visual{
+      border-radius: 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      overflow: hidden;
+      position: relative;
+    }
+    .visual .imgWrap{
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+    }
+    .visual img{
+      width: 100%;
+      height: auto;              /* ✅ no forced cropping */
+      border-radius: 16px;
+      object-fit: contain;       /* ✅ show full image */
+      background: rgba(0,0,0,0.30);
+      display: block;
+      filter: saturate(1.05) contrast(1.05);
+    }
+    .visual .overlay{
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.30));
+      pointer-events:none;
+    }
+
+    .copy{
+      padding: 6px 4px;
+    }
+    .kicker{
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+      margin: 0 0 10px;
+    }
+    h1{
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+      margin: 0 0 12px;
+    }
+    p{
+      margin: 0 0 18px;
+      color: rgba(255,255,255,0.80);
+      line-height: 1.45;
+      font-size: 16px;
+    }
+
+    .stat{
+      display:grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .statRow{
+      display:flex;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .big{
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .label{
+      color: rgba(255,255,255,0.70);
+      font-size: 14px;
+    }
+
+    .storyBox{
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 15px;
+      line-height: 1.55;
+      white-space: pre-line;
+      color: rgba(255,255,255,0.86);
+    }
+
+    /* bottom controls */
+    .bottom{
+      position: sticky;  /* ✅ stays visible as you scroll */
+      bottom: 14px;
+      z-index: 30;
+
+      margin: 0 18px 18px;
+      padding: 10px 12px;
+
+      border-radius: 18px;
+      background: rgba(0,0,0,0.30);
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(12px);
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      user-select:none;
+    }
+    .hint{
+      font-size: 12px;
+      color: rgba(255,255,255,0.60);
+    }
+    .btns{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    button{
+      border:0;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 750;
+      color: #06110a;
+      background: var(--barFill);
+      box-shadow: 0 14px 28px rgba(30,215,96,0.18);
+      transition: transform .08s ease, filter .15s ease;
+    }
+    button.secondary{
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.88);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: none;
+      backdrop-filter: blur(8px);
+    }
+    button:active{ transform: translateY(1px) scale(0.99); }
+    button:hover{ filter: brightness(1.03); }
+
+    /* final screen */
+    .final{
+      grid-template-columns: 1fr !important;
+      text-align:center;
+    }
+    .final .visual{ display:none; }
+    .final .copy{ max-width: 640px; margin: 0 auto; }
+    .choices{
+      display:flex;
+      gap: 12px;
+      justify-content:center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .yes{
+      background: var(--barFill);
+      color: #06110a;
+    }
+    .no{
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.88);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    /* confetti */
+    .confetti{
+      position: fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index: 999;
+    }
+    .confetti i{
+      position:absolute;
+      top: -20px;
+      width: 10px;
+      height: 16px;
+      opacity: .95;
+      transform: rotate(15deg);
+      border-radius: 2px;
+      animation: fall 1.25s linear forwards;
+    }
+    @keyframes fall{
+      to{
+        transform: translateY(120vh) rotate(340deg);
+        opacity: 1;
+      }
+    }
+
+    /* responsive */
+    @media (max-width: 760px){
+      .slide.active{
+        grid-template-columns: 1fr;
+      }
+      .bottom{ flex-direction: column; align-items:stretch; }
+      .btns{ width:100%; justify-content: space-between; }
+      button{ width: 48%; }
+      button.secondary{ width: 48%; }
+    }
+
+    /* ============================================
+       GREEN-TEXT INSTRUCTIONS (EDIT ME)
+
+       ✅ HOW TO ADD IMAGES
+       1) Put this HTML file in a folder
+       2) Put your images in the SAME folder:
+          love-wrapped/
+            love-wrapped.html
+            mirror.jpg
+            pitch.jpg
+            sad1.jpg
+            ...
+       3) In the slides array:
+          images: ["a.jpg", "b.jpg", "c.jpg"]
+
+       ✅ THIS VERSION
+       - The page can scroll.
+       - Images are NOT cropped.
+       - You can stack tons of images per slide and just scroll down.
+
+    */
+  </style>
+</head>
+
+<body>
+  <div class="frame" id="frame">
+    <div class="top">
+      <div class="progress" aria-label="Progress">
+        <div id="progressFill"></div>
+      </div>
+      <div class="meta">
+        <span class="pill" id="slideCount">1 / 1</span>
+        <span class="pill" id="tapHint">tap to advance</span>
+      </div>
+    </div>
+
+    <div class="stage" id="stage"></div>
+
+    <div class="bottom">
+      <div class="hint">←/→ keys • Space/Enter to advance</div>
+      <div class="btns">
+        <button class="secondary" id="prevBtn" type="button">Back</button>
+        <button id="nextBtn" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    /**
+     * ============================================
+     *  GREEN-TEXT: MAIN THINGS TO EDIT
+     * ============================================
+     */
+
+    const HER_NAME = "Lucienne Pizzi Wizzy";
+
+    const slides = [
+      {
+        kicker: "DICICHI WRAPPED",
+        title: `${HER_NAME}, the last 3 months together (and our rough journey there)`,
+        text: "A recap of our journey so far baby x",
+        images: ["mirror.jpg"],
+      },
+      {
+        kicker: "THE BEGINNING",
+        title: "The first time I really started to like you",
+        images: ["pitch.jpg"],
+        story: `The first time I really started liking you was at pitch. I remember thinking like damn, this chicks kinda cool
+
+I don't know if you felt the same at the time, but to me this was the beginning of my interest towards you
+
+and as you've found out - i always get whatever girl I want so it was basically game set match from this point`
+      },
+      {
+        kicker: "Me getting kicked in the fucking balls",
+        title: "You ripping my heart out",
+        text: "",
+        images: ["sad1.jpg", "sad2.jpg", "sad3.jpg"],
+        story: `HAHA remember that time that you broke my heart??
+
+It's ok I'm just kidding baby we're here now, I just thought it's an important part of our history
+
+Even though I went to Europe, and I said that we'd never get together after that, deep down I knew. I never gave up x `
+      },
+      {
+        kicker: "WE RUNNING IT BACK BABY",
+        title: "Me folding like a fuckin lawnchair",
+        text: "",
+        images: ["glitch.jpg", "rave1.jpg", "punch.jpg"],
+        story: `Eventually I went back to acting like a lil nervous ass bitch
+        
+        A notable event includes glitch where i basically acted like a stupid little nerd 
+
+        Also you know what you were doing when you wore that shirt to Bozo... like cmon bro really
+
+        I unfortunately don't have a photo of us at Angus' (before europe) but that was a big moment too lol
+        
+        Don't forget all the flirting though`
+      },
+      {
+        kicker: "WHOS GONNA LIFT THE BOAT",
+        title: "Me working hard to pull you",
+        text: "",
+        images: ["cute2.jpg", "djdecks.jpg", "jesus.jpg"],
+        story: `Basically enough tension to make a noose and autoerotically asphyxiate me
+        
+        Both of us working hard to pull the other person
+        
+        Probably the most fun I've had in a while and the anticipation was definitely something to remember hahahah
+        
+        Also this involved you crying at literally anything nice I ever do because apparently your ex left the bar at the bottom of the ocean`
+      },
+      {
+        kicker: "YOU CAME TO YOUR FUCKING SENSES",
+        title: "Finally ruined the fun and eventually made it serious ugh",
+        text: "",
+        images: ["date1.jpg", "date2.jpg"],
+        story: `Lowkey ICL i absolutely cooked with that date like that was so hectic
+        
+        I'm also glad we both lowkey forgot our anniversary date (nov 10 or smn)
+        
+        The beginning of the rest of our lives hahaha
+        
+        IDK why but i was lowkey still nervous doing this idk why there was no way you'd say no cause it's literally me
+        
+        But still thankful asf you said yes
+        
+        Look at how good you looked though like dayum bro cmon
+        
+        Anyways love you baby this was such a cute night`
+      },
+      {
+        kicker: "Stat breakdown",
+        title: "Some facts of our relo",
+        images: ["funnygross.jpg"],
+        text: "Some defs real data",
+        stats: [
+          { big: "100%", label: "worth everything" },
+          { big: "∞", label: "times I choose you x" },
+          { big: "1", label: "valentine I want" },
+          { big: "1 billion", label: "times i've been kicked in the balls" },
+          { big: "1", label: "valentine I want" },
+          { big: "50", label: "times cried from a plushy" },
+          { big: "30", label: "awkward interactions with your dad" },
+        ]
+      },
+      {
+        kicker: "More to come???",
+        title: "Who knows what the future holds for us",
+        text: "",
+        images: ["onknees.jpg"],
+        story: `We're the authors of our own story baby x
+        
+        Can't wait to see what our recap holds for us next year
+
+        Defs more of me being on my knees haha
+        
+        Love you baby x`
+      },
+      {
+        final: true,
+        kicker: "FINAL QUESTION",
+        title: "Will you be my Valentine? 💘",
+        text: "I was saving the best part for last."
+      }
+    ];
+
+    const stage = document.getElementById("stage");
+    const progressFill = document.getElementById("progressFill");
+    const slideCount = document.getElementById("slideCount");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const confetti = document.getElementById("confetti");
+
+    let index = 0;
+    let rendered = [];
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function makeSlide(slide){
+      const el = document.createElement("section");
+      el.className = "slide";
+
+      if(slide.final){
+        el.classList.add("final");
+        el.innerHTML = `
+          <div class="copy">
+            <div class="kicker">${slide.kicker ?? ""}</div>
+            <h1>${slide.title ?? ""}</h1>
+            <p>${slide.text ?? ""}</p>
+            <div class="choices">
+              <button class="yes" id="yesBtn" type="button">YES 💖</button>
+              <button class="no" id="noBtn" type="button">No 🙃</button>
+            </div>
+            <p style="margin-top:14px; color: rgba(255,255,255,0.62); font-size: 13px;">
+              (If you press “No”, this website will respectfully disagree.)
+            </p>
+          </div>
+        `;
+        return el;
+      }
+
+      const images = Array.isArray(slide.images) ? slide.images : [];
+      const imagesHtml = images.length
+        ? `
+          <div class="visual">
+            <div class="imgWrap">
+              ${images.map(src => `
+                <img src="${src}" alt="memory image"
+                     onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=&quot;color:rgba(255,255,255,.7);padding:8px 6px 0&quot;>Missing image: <strong>${src}</strong></div>');">
+              `).join("")}
+            </div>
+            <span class="overlay"></span>
+          </div>
+        `
+        : `
+          <div class="visual" style="display:flex;align-items:center;justify-content:center;padding:18px;">
+            <div style="color:rgba(255,255,255,.70); text-align:center;">
+              No images on this slide.<br>
+              <span style="font-size:12px;opacity:.8;">(Stats/text-only works great.)</span>
+            </div>
+          </div>
+        `;
+
+      const statsHtml = (slide.stats || []).map(s => `
+        <div class="statRow">
+          <div class="big">${s.big}</div>
+          <div class="label">${s.label}</div>
+        </div>
+      `).join("");
+
+      const storyHtml = slide.story
+        ? `<div class="storyBox">${escapeHtml(slide.story)}</div>`
+        : "";
+
+      el.innerHTML = `
+        ${imagesHtml}
+        <div class="copy">
+          <div class="kicker">${slide.kicker ?? ""}</div>
+          <h1>${slide.title ?? ""}</h1>
+          ${slide.text ? `<p>${slide.text}</p>` : ""}
+          ${storyHtml}
+          ${statsHtml ? `<div class="stat" style="margin-top:${slide.story ? "12px" : "6px"}">${statsHtml}</div>` : ""}
+        </div>
+      `;
+
+      return el;
+    }
+
+    function renderAll(){
+      stage.innerHTML = "";
+      rendered = slides.map(s => {
+        const el = makeSlide(s);
+        stage.appendChild(el);
+        return el;
+      });
+      update(true);
+    }
+
+    function update(initial=false){
+      rendered.forEach((el, i) => {
+        el.classList.toggle("active", i === index);
+      });
+
+      const total = slides.length;
+      const pct = ((index + 1) / total) * 100;
+      progressFill.style.width = pct + "%";
+      slideCount.textContent = `${index + 1} / ${total}`;
+
+      prevBtn.disabled = index === 0;
+      prevBtn.style.opacity = prevBtn.disabled ? 0.5 : 1;
+
+      nextBtn.textContent = slides[index].final ? "Replay" : "Next";
+
+      // scroll back to top of the card when changing slides (nice on phone)
+      document.getElementById("frame").scrollIntoView({ behavior: "smooth", block: "start" });
+
+      if(slides[index].final){
+        const yesBtn = document.getElementById("yesBtn");
+        const noBtn = document.getElementById("noBtn");
+
+        if(yesBtn){
+          yesBtn.addEventListener("click", () => {
+            popConfetti();
+            yesBtn.textContent = "YAY 💞";
+          }, { once: false });
+        }
+
+        if(noBtn){
+          noBtn.addEventListener("mouseenter", () => dodge(noBtn));
+          noBtn.addEventListener("click", () => {
+            noBtn.textContent = "Nice try 😌";
+            dodge(noBtn);
+          });
+        }
+      }
+
+      if(!initial){
+        document.getElementById("frame").animate(
+          [{ transform: "scale(1)" }, { transform: "scale(0.995)" }, { transform: "scale(1)" }],
+          { duration: 120, easing: "ease-out" }
+        );
+      }
+    }
+
+    function next(){
+      if(slides[index].final){
+        index = 0;
+        update();
+        return;
+      }
+      index = Math.min(slides.length - 1, index + 1);
+      update();
+    }
+
+    function prev(){
+      index = Math.max(0, index - 1);
+      update();
+    }
+
+    prevBtn.addEventListener("click", prev);
+    nextBtn.addEventListener("click", next);
+
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "ArrowRight" || e.key === " " || e.key === "Enter"){
+        e.preventDefault();
+        next();
+      }
+      if(e.key === "ArrowLeft"){
+        e.preventDefault();
+        prev();
+      }
+    });
+
+    function dodge(btn){
+      const dx = (Math.random() * 160) - 80;
+      const dy = (Math.random() * 80) - 40;
+      btn.style.transform = `translate(${dx}px, ${dy}px)`;
+      btn.style.transition = "transform .12s ease";
+      setTimeout(() => { btn.style.transition = "transform .35s ease"; }, 150);
+    }
+
+    function popConfetti(){
+      confetti.innerHTML = "";
+      const pieces = 70;
+      for(let i=0;i<pieces;i++){
+        const p = document.createElement("i");
+        const hue = Math.floor(Math.random()*360);
+        p.style.background = `hsl(${hue} 90% 60%)`;
+        p.style.left = (Math.random()*100) + "%";
+        p.style.animationDelay = (Math.random()*0.15) + "s";
+        p.style.width = (6 + Math.random()*8) + "px";
+        p.style.height = (10 + Math.random()*14) + "px";
+        p.style.borderRadius = (Math.random() > 0.6) ? "999px" : "2px";
+        confetti.appendChild(p);
+      }
+      setTimeout(() => confetti.innerHTML = "", 1400);
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
